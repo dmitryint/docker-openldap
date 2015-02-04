@@ -22,7 +22,7 @@ ENV MMC_AGENT_PASSWORD passw0rd
 VOLUME ["/var/lib/ldap", "/etc/ldap/slapd.d"]
 
 # Disable SSH
-# RUN rm -rf /etc/service/sshd /etc/my_init.d/00_regen_ssh_host_keys.sh
+RUN rm -rf /etc/service/sshd /etc/my_init.d/00_regen_ssh_host_keys.sh
 
 # Enable dnsmasq
 RUN /sbin/enable-service dnsmasq ca-authority
@@ -37,7 +37,8 @@ RUN echo "deb http://mds.mandriva.org/pub/mds/debian wheezy main" >> /etc/apt/so
 RUN apt-get -y update
 
 # Install openldap (slapd) and ldap-utils
-RUN LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get install -y --force-yes --no-install-recommends slapd ldap-utils  mmc-agent python-mmc-mail
+RUN LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends slapd ldap-utils openssl && \
+apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Expose ldap and mmc-agent default ports
 EXPOSE 389 7080
@@ -55,5 +56,3 @@ ADD service/slapd/slapd.sh /etc/service/slapd/run
 # Add mmc-agent deamon
 ADD service/mmc-agent/mmc-agent.sh /etc/service/mmc-agent/run
 
-# Clear out the local repository of retrieved package files
-RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
